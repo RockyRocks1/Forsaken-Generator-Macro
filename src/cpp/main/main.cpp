@@ -72,15 +72,15 @@ bool getGridCellDimensions(PixelReader& pixelReader, RECT inGridRect, GridInfo &
 
 	const int cellOutlineColor = 0x141414;
 	
-	int lastColor = 0x000000;
+	int lastColor = cellOutlineColor;
 	int occurences = 0;
 
 	bool success = pixelReader.CaptureScreenRegion(inGridRect.left, inGridRect.top, gridWidth, gridHeight);
 	if (!success)
 		return false;
 
-	int pixelY =  5;
-	for (int pixelX = 0; pixelX <= gridWidth; pixelX++) {
+	int pixelY = 5;
+	for (int pixelX = 1; pixelX < gridWidth; pixelX++) {
 		int pixelColor = pixelReader.PixelGetColor(pixelX, 5);
 		if (pixelColor == cellOutlineColor && pixelColor != lastColor) {
 			occurences += 1;
@@ -92,8 +92,8 @@ bool getGridCellDimensions(PixelReader& pixelReader, RECT inGridRect, GridInfo &
 		std::cout << "SUPER ERROR!" << std::endl;
 		return false;
 	}
-	outGridInfo.rows = occurences - 1;
-	outGridInfo.cols = occurences - 1;
+	outGridInfo.rows = occurences;
+	outGridInfo.cols = occurences;
 	
 	printf_s("Rows: %d, Cols: %d\n", outGridInfo.rows, outGridInfo.cols);
 	return true;
@@ -102,12 +102,12 @@ bool getNodePairs(PixelReader& pixelReader, RECT inGridRect, GridInfo inGridInfo
 	int gridWidth = inGridRect.right - inGridRect.left;
 	int gridHeight = inGridRect.bottom - inGridRect.top;
 
-	int nodeReadPixel = 0.20 * (1.f / inGridInfo.cols) * gridHeight;
+	int nodeReadPixel = std::round(0.20 * (1.f / inGridInfo.cols) * gridHeight);
 	std::map<int, Cell> singleNodes;
 	for (int cellRow = 0; cellRow < inGridInfo.rows; cellRow++) {
 		for (int cellCol = 0; cellCol < inGridInfo.cols; cellCol++) {
-			int cellX = ((double)(cellCol + 0.5) / inGridInfo.cols) * gridWidth;
-			int cellY = ((double)(cellRow + 0.5) / inGridInfo.rows) * gridHeight;
+			int cellX = std::round(((double)(cellCol + 0.5) / inGridInfo.cols) * gridWidth);
+			int cellY = std::round(((double)(cellRow + 0.5) / inGridInfo.rows) * gridHeight);
 			
 			int pixelColor = pixelReader.PixelGetColor(cellX, cellY - nodeReadPixel);
 			printf_s("Row: %d, Col: %d has color, 0x%X at (%d, %d)\n", cellRow, cellCol, pixelColor, cellX + inGridRect.left, cellY + inGridRect.top);

@@ -22,24 +22,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\minisat\core\Solver.cc">
-      <Filter>Minisat Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\minisat\core\SolverTypes.cc">
-      <Filter>Minisat Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\minisat\utils\System.cc">
-      <Filter>Minisat Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\minisat\core\ThrowOOMException.cc">
-      <Filter>Minisat Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\minisat\core\OutOfMemoryException.cc">
-      <Filter>Minisat Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\minisat\utils\Options.cc">
-      <Filter>Minisat Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\imgui\imgui.cpp">
       <Filter>imgui Source Files</Filter>
     </ClCompile>
@@ -72,6 +54,24 @@
     </ClCompile>
     <ClCompile Include="..\pixelreader\PixelReader.cpp">
       <Filter>PixelReader Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\minisat\minisat\core\OutOfMemoryException.cc">
+      <Filter>Minisat Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\minisat\minisat\core\Solver.cc">
+      <Filter>Minisat Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\minisat\minisat\core\SolverTypes.cc">
+      <Filter>Minisat Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\minisat\minisat\core\ThrowOOMException.cc">
+      <Filter>Minisat Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\minisat\minisat\utils\Options.cc">
+      <Filter>Minisat Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\minisat\minisat\utils\System.cc">
+      <Filter>Minisat Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

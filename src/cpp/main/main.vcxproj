@@ -27,12 +27,12 @@
     <ClCompile Include="..\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="..\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="..\minisat\core\OutOfMemoryException.cc" />
-    <ClCompile Include="..\minisat\core\Solver.cc" />
-    <ClCompile Include="..\minisat\core\SolverTypes.cc" />
-    <ClCompile Include="..\minisat\core\ThrowOOMException.cc" />
-    <ClCompile Include="..\minisat\utils\Options.cc" />
-    <ClCompile Include="..\minisat\utils\System.cc" />
+    <ClCompile Include="..\minisat\minisat\core\OutOfMemoryException.cc" />
+    <ClCompile Include="..\minisat\minisat\core\Solver.cc" />
+    <ClCompile Include="..\minisat\minisat\core\SolverTypes.cc" />
+    <ClCompile Include="..\minisat\minisat\core\ThrowOOMException.cc" />
+    <ClCompile Include="..\minisat\minisat\utils\Options.cc" />
+    <ClCompile Include="..\minisat\minisat\utils\System.cc" />
     <ClCompile Include="..\pixelreader\PixelReader.cpp" />
     <ClCompile Include="..\solver\GeneratorSolver.cpp" />
     <ClCompile Include="..\solver\Op.cpp" />
@@ -122,9 +122,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;NOMINMAX</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\src\cpp\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\src\cpp\;$(SolutionDir)\src\cpp\minisat</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,9 +137,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;NOMINMAX</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\src\cpp\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\src\cpp\;$(SolutionDir)\src\cpp\minisat</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
