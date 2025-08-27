@@ -148,7 +148,83 @@ bool getNodePairs(PixelReader& pixelReader, RECT inGridRect, GridInfo inGridInfo
 	
 	return true;
 }
+void MouseMove(int mouseX, int mouseY) {
+	// Move the mouse to the specified coordinates
+	SetCursorPos(mouseX, mouseY);
+	mouse_event(MOUSEEVENTF_MOVE, 1, 0, 0, 0);
 
+}
+void performStuff(CellPath inCellPath, RECT inGridRect, GridInfo inGridInfo) {
+	int gridWidth = inGridRect.right - inGridRect.left;
+	int gridHeight = inGridRect.bottom - inGridRect.top;
+	Cell firstCell = inCellPath.path[0];
+	int cellX = std::round(((double)(firstCell.col + 0.5) / inGridInfo.cols) * gridWidth) + inGridRect.left;
+	int cellY = std::round(((double)(firstCell.row + 0.5) / inGridInfo.rows) * gridHeight) + inGridRect.top;
+	MouseMove(cellX, cellY);
+	mouse_event(MOUSEEVENTF_LEFTDOWN, 1, 0, 0, 0);
+	for (Cell cell : inCellPath.path) {
+		if (cell == inCellPath.nodePair.firstNode)
+			continue;
+		std::this_thread::sleep_for(std::chrono::milliseconds(30));
+		int cellX = std::round(((double)(cell.col + 0.5) / inGridInfo.cols) * gridWidth) + inGridRect.left;
+		int cellY = std::round(((double)(cell.row + 0.5) / inGridInfo.rows) * gridHeight) + inGridRect.top;
+		MouseMove(cellX, cellY);
+		std::this_thread::sleep_for(std::chrono::milliseconds(30));
+	}
+	mouse_event(MOUSEEVENTF_LEFTUP, 1, 0, 0, 0);
+}
+void performThings(CellPath inCellPath, RECT inGridRect, GridInfo inGridInfo) {
+	const int waitTime = 16;
+	int gridWidth = inGridRect.right - inGridRect.left;
+	int gridHeight = inGridRect.bottom - inGridRect.top;
+
+	// Variables to track direction for skipping cells in a straight line
+	int currentDeltaRow = 0;
+	int currentDeltaCol = 0;
+	int streak = 0;
+	// Loop from the second cell to the end
+	for (size_t i = 0; i < inCellPath.path.size() - 1; ++i) {
+		Cell currentCell = inCellPath.path[i];
+		Cell nextCell = inCellPath.path[i + 1];
+
+		// Calculate the direction delta
+		int nextDeltaRow = nextCell.row - currentCell.row;
+		int nextDeltaCol = nextCell.col - currentCell.col;
+
+		// Check if the direction has changed from the last movement
+		bool directionChanged = (currentDeltaRow != nextDeltaRow) || (currentDeltaCol != nextDeltaCol);
+		bool isFirstCell = (i == 0);
+		bool isSecondToLastCell = (i == inCellPath.path.size() - 2);
+		// Always move to the last cell of the path
+		// If the direction has changed or it's the final cell, perform a mouse movement
+		if (isFirstCell || isSecondToLastCell || directionChanged || streak > 2) {
+			
+			int newCellX = std::round(((double)(currentCell.col + 0.5) / inGridInfo.cols) * gridWidth) + inGridRect.left;
+			int newCellY = std::round(((double)(currentCell.row + 0.5) / inGridInfo.rows) * gridHeight) + inGridRect.top;
+
+			// Add a small delay to allow the OS to catch up
+			MouseMove(newCellX, newCellY);
+			std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+			if (isFirstCell)
+				mouse_event(MOUSEEVENTF_LEFTDOWN, 1, 0, 0, 0);
+			// Update the direction for the next iteration
+			currentDeltaRow = nextDeltaRow;
+			currentDeltaCol = nextDeltaCol;
+			streak = 0;
+			continue;
+		}
+		streak++;
+	}
+	Cell lastCell = inCellPath.path.back();
+
+	int cellX = std::round(((double)(lastCell.col + 0.5) / inGridInfo.cols) * gridWidth) + inGridRect.left;
+	int cellY = std::round(((double)(lastCell.row + 0.5) / inGridInfo.rows) * gridHeight) + inGridRect.top;
+	MouseMove(cellX, cellY);
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+	// Release the mouse button at the end of the path
+	mouse_event(MOUSEEVENTF_LEFTUP, 1, 0, 0, 0);
+	std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+}
 
 void solvingSequence() {
 	PixelReader pixelReader;
@@ -185,13 +261,30 @@ void solvingSequence() {
 		}
 		std::cout << std::endl;
 	}
-
+	std::vector<CellPath> cellPaths = generatorSolver.getCellPaths();
+	for (CellPath cellPath : cellPaths) {
+		performThings(cellPath, gridRect, gridInfo);
+	}
 }
 int main() {
 	std::cout << "Make roblox the active window so the macro can see the puzzle clearly!";
-	std::this_thread::sleep_for(std::chrono::seconds(3));
+	
+	bool isKeyPressed = false;
 
-	solvingSequence();
+	while (true) {
+		// Check if the 'A' key (virtual key code 0x41) is pressed.
+		// The high-order bit is set if the key is down.
+		if (GetAsyncKeyState(0x46) & 0x8000) { // hold F;
+			solvingSequence();
+				
+		}
+		else {
+			isKeyPressed = false;
+		}
+
+		// A short delay to prevent the loop from consuming too much CPU.
+		Sleep(10);
+	}
 		
 	std::this_thread::sleep_for(std::chrono::seconds(1000));
 

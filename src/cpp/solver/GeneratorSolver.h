@@ -14,6 +14,9 @@ struct Cell {
 	bool operator==(const Cell& other) const {
 		return row == other.row && col == other.col;
 	}
+	bool operator!=(const Cell& other) const {
+		return row != other.row || col != other.col;
+	}
 	bool operator<(const Cell& other) const {
 		if (row != other.row)
 			return row < other.row;
@@ -30,12 +33,17 @@ struct NodePair {
 		return firstNode == other.firstNode && secondNode == other.secondNode;
 	}
 };
+struct CellPath {
+	NodePair nodePair;
+	std::vector<Cell> path;
+
+};
 
 class GeneratorSolver {
 private:
 	size_t m_iRows;
 	size_t m_iCols;
-	std::vector<NodePair> m_pNodePairs;
+	std::vector<NodePair> m_nodePairs;
 	std::set<Cell> m_pNodes;
 	std::vector<Variable> m_pVariables;
 	std::unique_ptr<Minisat::Solver> m_minisatSolver;
@@ -47,12 +55,14 @@ public:
 	std::vector<Variable> initVariables() const;
 	void initNodePairs(const std::vector<NodePair> &nodePairs);
 	std::vector<Cell> getNeighbors(Cell cell) const;
+
 	inline size_t getRows() const { return this->m_iRows; }
 	inline size_t getCols() const { return this->m_iCols; }
 	inline char getSolvedGridValue(size_t row, size_t col) const { return this->m_solvedGrid[row][col]; };
 	inline std::vector<std::vector<char>> getSolvedGrid() const { return this->m_solvedGrid; };
 
 	bool solve();
+	std::vector<CellPath> getCellPaths();
 private:
 	void addCellsAtLeastOneColorClauses();
 	void addCellsAtMostOneColorClauses();

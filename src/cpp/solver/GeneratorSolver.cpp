@@ -41,9 +41,9 @@ std::vector<Cell> GeneratorSolver::getNeighbors(Cell cell) const {
 	return cellNeighbors;
 }
 void GeneratorSolver::initNodePairs(const std::vector<NodePair> &nodePairs) {
-	this->m_pNodePairs = nodePairs;
+	this->m_nodePairs = nodePairs;
 	this->m_pNodes = {};
-	for (NodePair nodePair : this->m_pNodePairs) {
+	for (NodePair nodePair : this->m_nodePairs) {
 		this->m_pNodes.insert(nodePair.firstNode);
 		this->m_pNodes.insert(nodePair.secondNode);
 	}
@@ -51,7 +51,7 @@ void GeneratorSolver::initNodePairs(const std::vector<NodePair> &nodePairs) {
 }
 std::vector<Variable> GeneratorSolver::initVariables() const {
 	std::vector<Variable> variables;
-	const size_t numPairs = this->m_pNodePairs.size();
+	const size_t numPairs = this->m_nodePairs.size();
 
 	for (size_t row_num = 0; row_num < this->m_iRows; row_num++) {
 		for (size_t col_num = 0; col_num < this->m_iCols; col_num++) {
@@ -88,7 +88,7 @@ void GeneratorSolver::addClausesToSolver(ClauseList& clauses) {
 }
 
 void GeneratorSolver::addCellsAtLeastOneColorClauses() {
-	const size_t numPairs = this->m_pNodePairs.size();
+	const size_t numPairs = this->m_nodePairs.size();
 
 	for (size_t i = 0; i < this->m_pVariables.size(); i += numPairs) {
 		std::vector<Variable> singleCellVarList = std::vector<Variable>(this->m_pVariables.begin() + i, this->m_pVariables.begin() + i + numPairs);
@@ -97,7 +97,7 @@ void GeneratorSolver::addCellsAtLeastOneColorClauses() {
 	}
 }
 void GeneratorSolver::addCellsAtMostOneColorClauses() {
-	const size_t numPairs = this->m_pNodePairs.size();
+	const size_t numPairs = this->m_nodePairs.size();
 
 	for (size_t i = 0; i < this->m_pVariables.size(); i += numPairs) {
 		std::vector<Variable> singleCellVarList = std::vector<Variable>(this->m_pVariables.begin() + i, this->m_pVariables.begin() + i + numPairs);
@@ -107,9 +107,9 @@ void GeneratorSolver::addCellsAtMostOneColorClauses() {
 	}
 }
 void GeneratorSolver::addMarkedNodeClauses() {
-	const size_t numPairs = this->m_pNodePairs.size();
+	const size_t numPairs = this->m_nodePairs.size();
 
-	for (NodePair nodePair : this->m_pNodePairs) {
+	for (NodePair nodePair : this->m_nodePairs) {
 		Cell firstNode = nodePair.firstNode;
 		Cell secondNode = nodePair.secondNode;
 
@@ -123,9 +123,9 @@ void GeneratorSolver::addMarkedNodeClauses() {
 	}
 }
 void GeneratorSolver::addNodesOneNeighborClauses() {
-	const size_t numPairs = this->m_pNodePairs.size();
+	const size_t numPairs = this->m_nodePairs.size();
 
-	for (NodePair nodePair : this->m_pNodePairs) {
+	for (NodePair nodePair : this->m_nodePairs) {
 		ClauseList generatedClauses;
 		Cell firstNode = nodePair.firstNode;
 		Cell secondNode = nodePair.secondNode;
@@ -151,7 +151,7 @@ void GeneratorSolver::addNodesOneNeighborClauses() {
 	}
 }
 void GeneratorSolver::addNonNodeTwoNeighborClauses() {
-	const size_t numPairs = this->m_pNodePairs.size();
+	const size_t numPairs = this->m_nodePairs.size();
 	for (size_t row = 0; row < this->m_iRows; row++) {
 		for (size_t col = 0; col < this->m_iCols; col++) {
 			Cell currentCell = { row, col };
@@ -166,7 +166,7 @@ void GeneratorSolver::addNonNodeTwoNeighborClauses() {
 				neighborVarsIndexStart.push_back(neighborVarIndexStart);
 			}
 
-			for (NodePair nodePair : this->m_pNodePairs) {
+			for (NodePair nodePair : this->m_nodePairs) {
 				size_t currentCellVarIndex = currentCellVarIndexStart + nodePair.pairIndex;
 				Variable currentCellVar = this->m_pVariables[currentCellVarIndex];
 
@@ -187,26 +187,18 @@ void GeneratorSolver::addNonNodeTwoNeighborClauses() {
 }
 bool GeneratorSolver::solve() {
 	ClauseList allClauseList;
-	const size_t numPairs = this->m_pNodePairs.size();
+	const size_t numPairs = this->m_nodePairs.size();
 
-	
 	// this->addCellsAtLeastOneColorClauses, ONLY uncomment this if you want all cells to be filled.
 	this->addCellsAtMostOneColorClauses();
 	this->addMarkedNodeClauses();
 	this->addNodesOneNeighborClauses();
 	this->addNonNodeTwoNeighborClauses();
-	
-	
 
-
-
-
-	
 	bool satisfiable = this->m_minisatSolver->solve();
 	if (!satisfiable)
 		return false;
-
-
+	
 	for (size_t varIndex = 0; varIndex < this->m_minisatSolver->model.size(); varIndex++) {
 		bool truthyVariable = this->m_minisatSolver->model[(int)varIndex].isTrue();
 		if (!truthyVariable)
@@ -214,10 +206,49 @@ bool GeneratorSolver::solve() {
 		size_t pairIndex = varIndex % numPairs;
 		size_t varCol = (varIndex / numPairs) % this->m_iCols;
 		size_t varRow = (varIndex / numPairs) / this->m_iCols;
-		for (NodePair nodePair : this->m_pNodePairs) {
+		for (NodePair nodePair : this->m_nodePairs) {
 			if (nodePair.pairIndex == pairIndex)
 				this->m_solvedGrid[varRow][varCol] = nodePair.contents;
 		}
 	}
 	return true;
+}
+std::vector<CellPath> GeneratorSolver::getCellPaths() {
+	std::vector<CellPath> cellPaths;
+	
+	if (!this->m_minisatSolver->okay())
+		return {};
+	
+	for (NodePair nodePair : this->m_nodePairs) {
+		CellPath currentCellPath;
+		currentCellPath.nodePair = nodePair;
+		currentCellPath.path.push_back(nodePair.firstNode);
+		
+		Cell lastCell = currentCellPath.path.back();
+
+		while (lastCell != nodePair.secondNode) {
+			bool pathExtended = false;
+			std::vector<Cell> lastCellNeighbors = this->getNeighbors(lastCell);
+			for (Cell lastCellNeighbor : lastCellNeighbors) {
+				size_t neighborRow = lastCellNeighbor.row;
+				size_t neighborCol = lastCellNeighbor.col;
+
+				if (this->getSolvedGridValue(neighborRow, neighborCol) != currentCellPath.nodePair.contents)
+					continue;
+				if (currentCellPath.path.size() > 1) {
+					Cell secondLastCell = *(currentCellPath.path.end() - 2);
+					if (lastCellNeighbor == secondLastCell)
+						continue;
+				}
+				lastCell = lastCellNeighbor;
+				currentCellPath.path.push_back(lastCell);
+				pathExtended = true;
+				break;
+			}
+			if (!pathExtended)
+				return {};
+		}
+		cellPaths.push_back(currentCellPath);
+	}
+	return cellPaths;
 }
